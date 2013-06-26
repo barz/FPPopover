@@ -301,6 +301,20 @@
         p.x = fromView.frame.origin.x;
         p.y = fromView.frame.origin.y + fromView.frame.size.height/2.0;
     }
+    else
+    {
+        // Hsoi 2013-06-26 - Without this "else", the static analyzer generates a "Passed-by-value struct
+        // argument contains uninitialized data" warning. What it's seeing is this series of if/if-else
+        // statements and figures there MIGHT be a chance all cases could fail and we return an undesired
+        // value. So, we'll have this else here to keep the analyzer quiet.
+        //
+        // Thing is, all cases ARE being handled above, so we shouldn't get here. Thus, we'll
+        // just set dummy values to quiet the analyzer, and assert since it would be a programmer
+        // error that we got here.
+        p.x = -1.0;
+        p.y = -1.0;
+        NSAssert(NO, @"-[FPPopoverController originFromView:] - unknown arrow direction");
+    }
 
     return p;
 }
@@ -369,20 +383,36 @@
 	if ([_viewController respondsToSelector:@selector(shouldAutorotateToInterfaceOrientation:)] &&
         [[[UIDevice currentDevice] systemVersion] floatValue] < 6.0)
 	{
-		UIInterfaceOrientation interfaceOrientation;
+        // !!!: Hsoi 2013-06-26 - what to do about this static analyzer warning?
+        //
+        // The way this code was written, the static analyzer generates a "Value stored to
+        // 'interfaceOrientation' is never read" warning. True enough. So I have just commented out
+        // all references to 'interfaceOrientation. Can it be removed? Well, I get the feeling there's
+        // a reason for this. Hrm. See this:
+        //
+        // https://github.com/50pixels/FPPopover/commit/b83d0cb3a9213c42c9ab7701ce0fd2b055abbd11
+        //
+        // Looks like that's why it was added. Then the next commit:
+        //
+        // https://github.com/50pixels/FPPopover/commit/2da269fb163db9d6fce6c41892345d931e3dbd3e#FPPopoverController.m
+        //
+        // seems to have removed it, I guess in favor of a more native solution. Anyways, I guess this
+        // is cruft to clean out? For me, for now, I'll just comment it out and let the original
+        // author decide.
+		//UIInterfaceOrientation interfaceOrientation;
 		switch (_deviceOrientation)
 		{
 			case UIDeviceOrientationLandscapeLeft:
-				interfaceOrientation = UIInterfaceOrientationLandscapeLeft;
+				//interfaceOrientation = UIInterfaceOrientationLandscapeLeft;
 				break;
 			case UIDeviceOrientationLandscapeRight:
-				interfaceOrientation = UIInterfaceOrientationLandscapeRight;
+				//interfaceOrientation = UIInterfaceOrientationLandscapeRight;
 				break;
 			case UIDeviceOrientationPortrait:
-				interfaceOrientation = UIInterfaceOrientationPortrait;
+				//interfaceOrientation = UIInterfaceOrientationPortrait;
 				break;
 			case UIDeviceOrientationPortraitUpsideDown:
-				interfaceOrientation = UIInterfaceOrientationPortraitUpsideDown;
+				//interfaceOrientation = UIInterfaceOrientationPortraitUpsideDown;
 				break;
 			default:
 				return;	// just ignore face up / face down, etc.
@@ -428,14 +458,10 @@
     // thanks @Niculcea
     // If we presentFromPoint with _fromView nil will calculate based on self.orgin with 2x2 size.
     // Fix for presentFromPoint from avolovoy's FPPopover fork
-    float width = 2.0f;
-    float height = 2.0f;
     CGPoint p = CGPointMake(self.origin.x, self.origin.y);
     
     if (v != nil) {
         p = [v.superview convertPoint:v.frame.origin toView:self.view];
-        width = v.frame.size.width;
-        height = v.frame.size.height;
     }
     
     
