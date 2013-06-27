@@ -124,14 +124,15 @@
         
 #if __has_feature(objc_arc)
         //ARC on
-        id bself = self;
+        id __weak bself = self;
 #else
         //ARC off
         __block id bself = self;
 #endif
         
         [_touchView setTouchedOutsideBlock:^{
-            [bself dismissPopoverAnimated:YES];
+            id sself = bself;
+            [sself dismissPopoverAnimated:YES];
         }];
 
         self.contentSize = CGSizeMake(200, 300); //default size
