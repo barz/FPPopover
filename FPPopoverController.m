@@ -14,7 +14,7 @@
 {
     FPTouchView *_touchView;
     FPPopoverView *_contentView;
-    UIViewController *_viewController;
+    __weak UIViewController *_viewController;
     UIWindow *_window;
     UIView *_fromView;
     UIDeviceOrientation _deviceOrientation;
@@ -93,7 +93,6 @@
     SAFE_ARC_RELEASE(_touchView);
     self.delegate = nil;
     
-    SAFE_ARC_RELEASE(_viewController);
     _viewController = nil;
     
     SAFE_ARC_SUPER_DEALLOC();
@@ -140,8 +139,8 @@
         _contentView = [[FPPopoverView alloc] initWithFrame:CGRectMake(0, 0, 
                                               self.contentSize.width, self.contentSize.height)];
         
-        _viewController = SAFE_ARC_RETAIN(viewController);
-        
+        [self addChildViewController:viewController];
+        _viewController = viewController;
         [_touchView addSubview:_contentView];
         
         [_contentView addContentView:_viewController.view];
@@ -157,6 +156,8 @@
         _contentView.clipsToBounds = NO;
         
         [_viewController addObserver:self forKeyPath:@"title" options:NSKeyValueObservingOptionNew context:nil];
+
+        [viewController didMoveToParentViewController:self];
     }
     return self;
 }
