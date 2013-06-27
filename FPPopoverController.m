@@ -429,7 +429,13 @@
 
 -(void)willPresentNewPopover:(NSNotification*)notification
 {
-    if(notification.object != self)
+    // ???: Hsoi 2013-06-27 - Why does this guard against the object being self?
+    //
+    // The way the code (presently) is, the ONLY thing that broadcasts the notification is "self" so this
+    // will always be guarded against and thus the delegate never execute. Wha???
+    //
+    // I'm commenting out the if-check. I don't get it, but I do need to get the notification.
+    //if(notification.object != self)
     {
         if([self.delegate respondsToSelector:@selector(presentedNewPopoverController:shouldDismissVisiblePopover:)])
         {
