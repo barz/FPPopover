@@ -308,12 +308,10 @@
         // statements and figures there MIGHT be a chance all cases could fail and we return an undesired
         // value. So, we'll have this else here to keep the analyzer quiet.
         //
-        // Thing is, all cases ARE being handled above, so we shouldn't get here. Thus, we'll
-        // just set dummy values to quiet the analyzer, and assert since it would be a programmer
-        // error that we got here.
-        p.x = -1.0;
-        p.y = -1.0;
-        NSAssert(NO, @"-[FPPopoverController originFromView:] - unknown arrow direction");
+        // After working with this a bit, I can only assume the original author's intent
+        // was to return 0,0 in this case so... let's just be explicit about it.
+        p.x = 0.0;
+        p.y = 0.0;
     }
 
     return p;
